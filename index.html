@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#8a4b1f">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Tea Shop</title>
+<style>
+  :root{--bg:#fff;--panel:#f7f3ee;--line:#e6ddd3;--ink:#2b211b;--muted:#7a6a5e;--chai:#8a4b1f;--chai-dark:#6e3a15;--sale:#1f7a3a;--exp:#b3392a;--gold:#c9931a;--r:16px}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI",Roboto,"Noto Sans",Arial,sans-serif;font-size:17px;line-height:1.35}
+  body{padding-bottom:84px}
+  button,input,select{font:inherit}
+  h2{font-size:17px;margin:20px 0 10px;font-weight:700}
+  header{position:sticky;top:0;z-index:5;background:var(--chai);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+  header b{font-size:20px}header small{display:block;opacity:.85;font-size:13px}
+  .ic-btn{background:rgba(255,255,255,.18);border:0;color:#fff;border-radius:20px;padding:7px 12px;font-size:14px}
+  main{padding:14px 16px;max-width:600px;margin:0 auto}
+  .page{display:none}.page.on{display:block}
+  .card{background:var(--panel);border-radius:var(--r);padding:14px 16px;margin-bottom:12px}
+  .big{font-size:40px;font-weight:800;line-height:1;letter-spacing:-.5px}
+  .lbl{color:var(--muted);font-size:14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .tile{background:#fff;border-radius:12px;padding:10px 12px}
+  .tile .v{font-size:21px;font-weight:700}.tile .l{color:var(--muted);font-size:13px}
+  .sale{color:var(--sale)}.exp{color:var(--exp)}
+  .row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line);gap:10px}
+  .row:last-child{border-bottom:0}.row .t{font-weight:600}.row .s{color:var(--muted);font-size:13px}.row .amt{font-weight:700;white-space:nowrap}
+  .bar{height:8px;border-radius:4px;background:var(--chai);opacity:.8}
+  .alert{background:#fdece9;color:var(--exp);border-radius:12px;padding:12px 14px;font-size:15px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .info{background:#fff4d6;color:#7a5400;border-radius:12px;padding:10px 14px;font-size:14px;margin-bottom:12px}
+  .field{margin-bottom:12px}.field label{display:block;font-size:14px;color:var(--muted);margin-bottom:4px}
+  .field input,.field select{width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:20px}
+  .field input:focus,.field select:focus{outline:2px solid var(--chai);border-color:transparent}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .btn{width:100%;padding:16px;border:0;border-radius:14px;background:var(--chai);color:#fff;font-size:19px;font-weight:700}
+  .btn:active{background:var(--chai-dark)}.btn.sm{width:auto;padding:9px 14px;font-size:15px;border-radius:10px}
+  .btn.ghost{background:#fff;color:var(--chai);border:1.5px solid var(--chai)}.btn.pay{background:var(--sale)}
+  .sum{display:flex;justify-content:space-between;background:var(--panel);border-radius:12px;padding:12px 14px;margin:8px 0}.sum b{font-size:19px}
+  details summary{cursor:pointer;color:var(--chai);font-weight:600;padding:8px 0}
+  .search{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;font-size:17px}
+  .qty{display:flex;align-items:center;gap:6px}.qty button{width:42px;height:42px;border-radius:12px;border:1.5px solid var(--chai);background:#fff;color:var(--chai);font-size:22px;font-weight:700}
+  .qty span{min-width:36px;text-align:center;font-weight:700;font-size:19px}
+  .pill{font-size:12px;padding:2px 8px;border-radius:10px;background:#fdece9;color:var(--exp);font-weight:600}.pill.ok{background:#e6f4ea;color:var(--sale)}.pill.part{background:#fff4d6;color:#8a6208}
+  .empty{color:var(--muted);text-align:center;padding:24px 0}
+  table{width:100%;border-collapse:collapse;font-size:15px}th,td{padding:8px 4px;text-align:right;border-bottom:1px solid var(--line)}th:first-child,td:first-child{text-align:left}th{color:var(--muted);font-weight:600;font-size:13px}
+  nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;z-index:5;padding-bottom:env(safe-area-inset-bottom)}
+  nav button{flex:1;border:0;background:none;padding:10px 4px 12px;color:var(--muted);font-size:12px;display:flex;flex-direction:column;align-items:center;gap:3px}
+  nav button .ic{font-size:22px}nav button.on{color:var(--chai);font-weight:700}
+  #busy{position:fixed;inset:0;background:rgba(255,255,255,.7);display:none;align-items:center;justify-content:center;z-index:20;font-weight:600;color:var(--chai)}
+  #toast{position:fixed;bottom:92px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:20px;font-size:14px;display:none;z-index:30;white-space:nowrap}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;z-index:25}
+  .modal .box{background:#fff;width:100%;max-width:600px;margin:0 auto;border-radius:18px 18px 0 0;padding:18px 16px 28px}.modal h3{margin:0 0 12px;font-size:18px}
+  #login{display:none;min-height:100vh;padding:40px 24px;max-width:400px;margin:0 auto}
+  #login h1{color:var(--chai);font-size:30px;margin:0 0 4px}
+  .offline{background:var(--ink);color:#fff;text-align:center;font-size:13px;padding:4px}
+  .menu-item{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);font-size:18px;font-weight:600}
+  .menu-item span:first-child{font-size:24px}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="login">
+  <div style="text-align:center;margin-bottom:24px"><img src="icon-192.png" width="72" style="border-radius:18px"><h1>Tea Shop</h1><div class="lbl">Sign in to continue</div></div>
+  <div class="field"><label>Username</label><input type="text" id="lUser" autocapitalize="none" autocomplete="username"></div>
+  <div class="field"><label>Password</label><input type="password" id="lPass" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+  <button class="btn" onclick="doLogin()">Sign in</button>
+  <div id="lErr" class="alert" style="display:none;margin-top:12px"></div>
+</div>
+
+<div id="app" style="display:none">
+<header><div><b id="hTitle">Tea Shop</b><small id="hSub"></small></div><button class="ic-btn" onclick="load(true)">↻ Sync</button></header>
+<div id="offlineBar" class="offline" style="display:none">Offline — entries are saved on phone and sent when internet returns</div>
+
+<main>
+  <!-- ===== HOME ===== -->
+  <section id="p-home" class="page on">
+    <div id="todayAlert" class="alert" style="display:none"><span>Today's sales &amp; expenses not entered yet</span><button class="btn sm" onclick="go('daily')">Enter now</button></div>
+    <div id="queueInfo" class="info" style="display:none"></div>
+    <div class="card">
+      <div class="lbl">Today</div>
+      <div class="big sale" id="tSales">₹0</div>
+      <div class="grid2" style="margin-top:10px">
+        <div class="tile"><div class="v exp" id="tExp">₹0</div><div class="l">Expense today</div></div>
+        <div class="tile"><div class="v" id="tNet">₹0</div><div class="l">Net today</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="lbl" id="periodLbl">This month</div>
+      <div class="grid2" style="margin-top:8px">
+        <div class="tile"><div class="v sale" id="kSales">₹0</div><div class="l">Sales</div></div>
+        <div class="tile"><div class="v exp" id="kExp">₹0</div><div class="l">Expenses</div></div>
+        <div class="tile"><div class="v" id="kNet">₹0</div><div class="l">Net</div></div>
+        <div class="tile"><div class="v" id="kAvg">₹0</div><div class="l">Avg / day</div></div>
+      </div>
+    </div>
+    <div class="card" onclick="go('bills')">
+      <div style="display:flex;justify-content:space-between;align-items:center"><div><div class="lbl">Unpaid supplier bills</div><div class="v exp" style="font-size:24px;font-weight:700" id="kUnpaid">₹0</div></div><div class="lbl" id="kUnpaidN"></div></div>
+    </div>
+    <div class="grid2" style="margin-bottom:12px">
+      <div class="card" style="margin:0" onclick="go('stock')"><div class="lbl">Stock value</div><div style="font-size:22px;font-weight:700" id="kStockVal">₹0</div></div>
+      <div class="card" style="margin:0" onclick="go('months')"><div class="lbl">Last month net</div><div style="font-size:22px;font-weight:700" id="kLastNet">₹0</div></div>
+    </div>
+    <h2>Last 7 days</h2>
+    <div class="card" id="last7"></div>
+  </section>
+
+  <!-- ===== DAILY ===== -->
+  <section id="p-daily" class="page">
+    <div class="field"><label>Date</label><input type="date" id="dDate" onchange="loadDailyForDate()"></div>
+    <div class="two">
+      <div class="field"><label>Tea sales ₹</label><input type="number" inputmode="numeric" id="dTea" oninput="dailyCalc()"></div>
+      <div class="field"><label>Egg sales ₹</label><input type="number" inputmode="numeric" id="dEgg" oninput="dailyCalc()"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label>Shop expense ₹</label><input type="number" inputmode="numeric" id="dShop" oninput="dailyCalc()"></div>
+      <div class="field"><label>Egg expense ₹</label><input type="number" inputmode="numeric" id="dEggExp" oninput="dailyCalc()"></div>
+    </div>
+    <details><summary>More expenses</summary>
+      <div class="two"><div class="field"><label>DS egg ₹</label><input type="number" inputmode="numeric" id="dDs" oninput="dailyCalc()"></div><div class="field"><label>Nasta ₹</label><input type="number" inputmode="numeric" id="dNasta" oninput="dailyCalc()"></div></div>
+      <div class="two"><div class="field"><label>Mumbra house ₹</label><input type="number" inputmode="numeric" id="dMum" oninput="dailyCalc()"></div><div class="field"><label>Assam house ₹</label><input type="number" inputmode="numeric" id="dAssam" oninput="dailyCalc()"></div></div>
+      <div class="field"><label>Note</label><input type="text" id="dNote"></div>
+    </details>
+    <div class="sum"><span>Total sales</span><b class="sale" id="dTotS">₹0</b></div>
+    <div class="sum"><span>Total expense</span><b class="exp" id="dTotE">₹0</b></div>
+    <div class="sum"><span>Net</span><b id="dNet">₹0</b></div>
+    <button class="btn" id="dSave" onclick="saveDaily()">Save day</button>
+    <h2>Recent days (tap to edit)</h2>
+    <div class="card" id="dailyList"></div>
+  </section>
+
+  <!-- ===== BILLS ===== -->
+  <section id="p-bills" class="page">
+    <h2 style="margin-top:4px">Unpaid bills</h2>
+    <div class="card" id="billsUnpaid"></div>
+    <h2>Add new bill</h2>
+    <div class="field"><label>Supplier</label><select id="bSup" onchange="bSupChange()"></select></div>
+    <div class="field" id="bSupNewWrap" style="display:none"><label>New supplier name</label><input type="text" id="bSupNew"></div>
+    <div class="two">
+      <div class="field"><label>Bill amount ₹</label><input type="number" inputmode="numeric" id="bAmt"></div>
+      <div class="field"><label>Paid now ₹</label><input type="number" inputmode="numeric" id="bPaid" placeholder="0"></div>
+    </div>
+    <details><summary>Date / type / bill no</summary>
+      <div class="two"><div class="field"><label>Date</label><input type="date" id="bDate"></div><div class="field"><label>Type</label><select id="bType"><option>Tea Purchase</option><option>Shop Expense</option></select></div></div>
+      <div class="two"><div class="field"><label>Bill date</label><input type="date" id="bBillDate"></div><div class="field"><label>Bill no</label><input type="text" id="bBillNo"></div></div>
+    </details>
+    <button class="btn" onclick="addBill()">Save bill</button>
+    <h2>Recent bills</h2>
+    <div class="card" id="billsRecent"></div>
+  </section>
+
+  <!-- ===== STOCK ===== -->
+  <section id="p-stock" class="page">
+    <div style="display:flex;gap:8px;align-items:center;margin-top:4px"><input class="search" id="sSearch" placeholder="Search item…" oninput="renderStock()"><button class="btn sm" onclick="openStock(0)">+ Add</button></div>
+    <div class="sum" style="margin-top:10px"><span>Total stock value</span><b id="sTotal">₹0</b></div>
+    <div class="card" id="stockList"></div>
+  </section>
+
+  <!-- ===== PRICES (admin) ===== -->
+  <section id="p-prices" class="page">
+    <div style="display:flex;gap:8px;align-items:center;margin-top:4px"><input class="search" id="prSearch" placeholder="Search product…" oninput="renderPrices()"><button class="btn sm" onclick="openPrice(0)">+ Add</button></div>
+    <div class="card" id="priceList" style="margin-top:10px"></div>
+  </section>
+
+  <!-- ===== MONTHS ===== -->
+  <section id="p-months" class="page">
+    <h2 style="margin-top:4px">Month by month (8th → 7th)</h2>
+    <div class="card" style="overflow-x:auto"><table id="mTable"></table></div>
+    <h2>Total of last N months</h2>
+    <div class="card" style="overflow-x:auto"><table id="mCum"></table></div>
+  </section>
+
+  <!-- ===== MORE ===== -->
+  <section id="p-more" class="page">
+    <div class="card"><div class="lbl">Signed in as</div><div style="font-size:20px;font-weight:700" id="mUser"></div></div>
+    <div class="menu-item" onclick="go('months')"><span>📅</span>Months summary</div>
+    <div class="menu-item" id="mPricesLink" onclick="go('prices')"><span>🏷️</span>Price list</div>
+    <div class="menu-item" onclick="load(true)"><span>↻</span>Sync now</div>
+    <div class="menu-item" onclick="logout()"><span>🚪</span>Sign out</div>
+    <p class="lbl" style="margin-top:20px">Tip: add this page to your phone home screen to use it like an app. Entries made offline are sent automatically when internet returns.</p>
+  </section>
+</main>
+
+<nav>
+  <button class="on" data-p="home" onclick="go('home')"><span class="ic">🏠</span>Home</button>
+  <button data-p="daily" onclick="go('daily')"><span class="ic">📝</span>Daily</button>
+  <button data-p="bills" onclick="go('bills')"><span class="ic">🧾</span>Bills</button>
+  <button data-p="stock" onclick="go('stock')"><span class="ic">📦</span>Stock</button>
+  <button data-p="more" onclick="go('more')"><span class="ic">☰</span>More</button>
+</nav>
+</div>
+
+<div class="modal" id="mStock"><div class="box"><h3 id="mStockTitle">Item</h3><input type="hidden" id="msRow">
+  <div class="field"><label>Item name</label><input type="text" id="msItem"></div>
+  <div class="two"><div class="field"><label>Pack size</label><input type="text" id="msPack" placeholder="250gm"></div><div class="field"><label>Qty (pcs)</label><input type="number" inputmode="numeric" id="msQty"></div></div>
+  <div class="field"><label>Unit cost ₹</label><input type="number" inputmode="decimal" id="msCost"></div>
+  <div class="two"><button class="btn ghost" onclick="closeModals()">Cancel</button><button class="btn" onclick="saveStock()">Save</button></div></div></div>
+<div class="modal" id="mPrice"><div class="box"><h3 id="mPriceTitle">Product</h3><input type="hidden" id="mpRow">
+  <div class="field"><label>Product</label><input type="text" id="mpProduct"></div>
+  <div class="field"><label>Pack size</label><input type="text" id="mpPack" placeholder="250g"></div>
+  <div class="two"><div class="field"><label>MRP ₹</label><input type="number" inputmode="numeric" id="mpMrp"></div><div class="field"><label>Wholesale cost ₹</label><input type="number" inputmode="numeric" id="mpCost"></div></div>
+  <div class="field"><label>Selling price ₹</label><input type="number" inputmode="numeric" id="mpSell"></div>
+  <div class="two"><button class="btn ghost" onclick="closeModals()">Cancel</button><button class="btn" onclick="savePrice()">Save</button></div></div></div>
+<div class="modal" id="mPay"><div class="box"><h3 id="mPayTitle">Pay bill</h3><input type="hidden" id="payRow">
+  <div class="field"><label>Amount paying now ₹</label><input type="number" inputmode="numeric" id="payAmt"></div>
+  <div class="two"><button class="btn ghost" onclick="closeModals()">Cancel</button><button class="btn pay" onclick="doPay()">Record payment</button></div></div></div>
+
+<div id="busy">Saving…</div>
+<div id="toast"></div>
+
+<script>
+/* ============ CONFIG — paste your Apps Script web app URL here ============ */
+var API_URL = 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+/* ========================================================================== */
+
+var D=null, startDay=8, TOKEN=localStorage.getItem('ts_token')||'', USER=JSON.parse(localStorage.getItem('ts_user')||'null');
+var el=function(id){return document.getElementById(id)}, rs=function(v){v=Math.round(v||0);return '₹'+v.toLocaleString('en-IN')};
+var num=function(id){var v=parseFloat(el(id).value);return isNaN(v)?0:v};
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function parseISO(s){var p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2])}
+var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmt(s){if(!s)return'';var d=parseISO(s);return d.getDate()+' '+MON[d.getMonth()]}
+function dayName(s){return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][parseISO(s).getDay()]}
+function addDays(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x}
+function periodStart(t){var d=new Date(t);if(d.getDate()<startDay)d.setMonth(d.getMonth()-1);d.setDate(startDay);return d}
+function periodEnd(s){var e=new Date(s);e.setMonth(e.getMonth()+1);e.setDate(e.getDate()-1);return e}
+function totalExp(r){return r.shop+r.eggExp+r.dsEgg+r.mumbra+r.assam+r.nasta}
+function toast(m){var t=el('toast');t.textContent=m;t.style.display='block';setTimeout(function(){t.style.display='none'},2400)}
+function busy(on){el('busy').style.display=on?'flex':'none'}
+function closeModals(){document.querySelectorAll('.modal').forEach(function(m){m.style.display='none'})}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function uuid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function todayISO(){return iso(new Date())}
+
+/* ============ API + OFFLINE QUEUE ============ */
+function api(action,data){
+  if(API_URL.indexOf('http')!==0) return MOCK(action,data);
+  return fetch(API_URL,{method:'POST',body:JSON.stringify({action:action,token:TOKEN,data:data})})
+    .then(function(r){return r.json()})
+    .then(function(r){ if(r.error==='LOGIN'){logout();throw new Error('Please sign in again')} if(!r.ok) throw new Error(r.error||'Failed'); return r; });
+}
+function queue(){return JSON.parse(localStorage.getItem('ts_queue')||'[]')}
+function setQueue(q){localStorage.setItem('ts_queue',JSON.stringify(q));showQueue()}
+/** Try online; if offline (or network fails) put in queue. Returns Promise of {ok, offline}. */
+function write(action,data){
+  if(!navigator.onLine) return Promise.resolve(enqueue(action,data));
+  return api(action,data).catch(function(e){ if(/sign in/i.test(e.message)) throw e; return enqueue(action,data); });
+}
+function enqueue(action,data){var q=queue();q.push({id:uuid(),action:action,data:data,at:Date.now()});setQueue(q);return{ok:true,offline:true}}
+function syncQueue(){
+  var q=queue(); if(!q.length||!navigator.onLine||!TOKEN) return Promise.resolve();
+  return api('sync',q).then(function(r){
+    var failed=q.filter(function(it){var res=r.results.filter(function(x){return x.id===it.id})[0];return !(res&&res.ok)});
+    setQueue(failed); if(q.length-failed.length) toast((q.length-failed.length)+' entries sent to sheet');
+    if(failed.length) toast(failed.length+' entries failed: '+r.results.filter(function(x){return !x.ok})[0].error);
+  }).catch(function(){});
+}
+function showQueue(){var q=queue();var b=el('queueInfo');b.style.display=q.length?'block':'none';b.textContent=q.length+' entries waiting to send (will send automatically when online)'}
+window.addEventListener('online',function(){el('offlineBar').style.display='none';syncQueue().then(function(){load()})});
+window.addEventListener('offline',function(){el('offlineBar').style.display='block'});
+
+/* ============ LOGIN ============ */
+function doLogin(){
+  el('lErr').style.display='none';
+  api('login',{username:el('lUser').value,password:el('lPass').value}).then(function(r){
+    TOKEN=r.token;USER=r.user;localStorage.setItem('ts_token',TOKEN);localStorage.setItem('ts_user',JSON.stringify(USER));start();
+  }).catch(function(e){el('lErr').textContent=e.message;el('lErr').style.display='block'});
+}
+function logout(){TOKEN='';USER=null;localStorage.removeItem('ts_token');localStorage.removeItem('ts_user');localStorage.removeItem('ts_data');el('app').style.display='none';el('login').style.display='block'}
+function start(){
+  el('login').style.display='none';el('app').style.display='block';
+  el('mUser').textContent=USER.name+' ('+USER.role+')';
+  el('mPricesLink').style.display=USER.role==='admin'?'flex':'none';
+  el('offlineBar').style.display=navigator.onLine?'none':'block';
+  var cached=localStorage.getItem('ts_data'); if(cached){D=JSON.parse(cached);D.today=todayISO();applyData();el('hSub').textContent='Showing saved data'}
+  syncQueue().then(function(){load()});
+}
+
+/* ============ LOAD ============ */
+function load(manual){
+  if(!navigator.onLine){ if(manual)toast('No internet — showing saved data'); return; }
+  el('hSub').textContent='Loading…';
+  api('getAll').then(function(d){
+    D=d;D.today=todayISO();localStorage.setItem('ts_data',JSON.stringify(d));applyData();
+    el('hSub').textContent='Updated '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); if(manual)toast('Synced');
+  }).catch(function(e){el('hSub').textContent='Error: '+e.message});
+}
+function applyData(){
+  startDay=+(D.lists.settings['Month starts on day']||8);
+  if(!el('dDate').value)el('dDate').value=D.today; if(!el('bDate').value)el('bDate').value=D.today;
+  showQueue(); renderHome(); loadDailyForDate(); renderDailyList(); renderBills(); renderStock(); renderPrices(); renderMonths();
+}
+function go(p){document.querySelectorAll('.page').forEach(function(s){s.classList.toggle('on',s.id==='p-'+p)});document.querySelectorAll('nav button').forEach(function(b){b.classList.toggle('on',b.dataset.p===p)});window.scrollTo(0,0)}
+
+/* ============ HOME ============ */
+function periodTotals(ps){var pe=periodEnd(ps),a=iso(ps),b=iso(pe),s=0,e=0,d=0;D.daily.forEach(function(r){if(r.date>=a&&r.date<=b){s+=r.tea+r.egg;e+=totalExp(r);d++}});return{sales:s,exp:e,days:d,start:a,end:b}}
+function renderHome(){
+  var today=parseISO(D.today), ps=periodStart(today), cur=periodTotals(ps);
+  var byDate={}; D.daily.forEach(function(r){byDate[r.date]=r});
+  var t=byDate[D.today]; var ts=t?t.tea+t.egg:0, te=t?totalExp(t):0;
+  el('todayAlert').style.display=t?'none':'flex';
+  el('tSales').textContent=rs(ts); el('tExp').textContent=rs(te); el('tNet').textContent=rs(ts-te); el('tNet').className='v '+(ts-te>=0?'sale':'exp');
+  el('periodLbl').textContent='This month  ·  '+fmt(cur.start)+' – '+fmt(cur.end)+'  ·  '+cur.days+' days entered';
+  el('kSales').textContent=rs(cur.sales); el('kExp').textContent=rs(cur.exp); el('kNet').textContent=rs(cur.sales-cur.exp); el('kNet').className='v '+(cur.sales-cur.exp>=0?'sale':'exp');
+  el('kAvg').textContent=rs(cur.days?cur.sales/cur.days:0);
+  var un=D.purchases.filter(function(p){return p.amount-p.paid>0}), tot=un.reduce(function(a,p){return a+p.amount-p.paid},0);
+  el('kUnpaid').textContent=rs(tot); el('kUnpaidN').textContent=un.length?un.length+' bills ›':'all paid ✓';
+  var sv=0;D.stock.forEach(function(x){sv+=x.qty*x.cost}); el('kStockVal').textContent=rs(sv);
+  var lp=new Date(ps);lp.setMonth(lp.getMonth()-1); var last=periodTotals(lp); el('kLastNet').textContent=rs(last.sales-last.exp); el('kLastNet').className=last.sales-last.exp>=0?'sale':'exp';
+  // last 7 days
+  var max=1,rows=[]; for(var i=0;i<7;i++){var d=iso(addDays(today,-i));var r=byDate[d];var v=r?r.tea+r.egg:0;if(v>max)max=v;rows.push([d,r,v])}
+  el('last7').innerHTML=rows.map(function(x){
+    var d=x[0],r=x[1],v=x[2];
+    if(!r) return '<div class="row" onclick="editDay(\''+d+'\')"><div><div class="t">'+dayName(d)+' '+fmt(d)+'</div><div class="s exp">not entered — tap to add</div></div><span class="amt">—</span></div>';
+    var e=totalExp(r);
+    return '<div class="row" onclick="editDay(\''+d+'\')"><div style="flex:1"><div class="t">'+dayName(d)+' '+fmt(d)+'</div><div class="bar" style="width:'+Math.max(4,v/max*100)+'%"></div><div class="s">exp '+rs(e)+'</div></div><div style="text-align:right"><div class="amt sale">'+rs(v)+'</div><div class="s">net '+rs(v-e)+'</div></div></div>';
+  }).join('');
+}
+
+/* ============ DAILY ============ */
+var DF={dTea:'tea',dEgg:'egg',dShop:'shop',dEggExp:'eggExp',dDs:'dsEgg',dNasta:'nasta',dMum:'mumbra',dAssam:'assam'};
+function loadDailyForDate(){var date=el('dDate').value;var r=D.daily.filter(function(x){return x.date===date})[0];
+  Object.keys(DF).forEach(function(id){el(id).value=r?(r[DF[id]]||''):''});el('dNote').value=r?r.note.replace(/\s*\[.*?\]$/,''):'';el('dSave').textContent=r?'Update day':'Save day';dailyCalc()}
+function dailyCalc(){var s=num('dTea')+num('dEgg'),e=num('dShop')+num('dEggExp')+num('dDs')+num('dNasta')+num('dMum')+num('dAssam');el('dTotS').textContent=rs(s);el('dTotE').textContent=rs(e);el('dNet').textContent=rs(s-e);el('dNet').className=s-e>=0?'sale':'exp'}
+function saveDaily(){
+  var date=el('dDate').value;if(!date)return toast('Choose a date');
+  var e={date:date,note:el('dNote').value};Object.keys(DF).forEach(function(id){e[DF[id]]=num(id)});
+  if(!e.tea&&!e.egg&&!confirm('Sales are 0. Save anyway?')) return;
+  busy(true);
+  write('saveDaily',e).then(function(res){
+    var i=D.daily.findIndex(function(x){return x.date===date});var rec=Object.assign({row:res.row||0},e);if(i>-1)D.daily[i]=rec;else D.daily.push(rec);
+    localStorage.setItem('ts_data',JSON.stringify(D)); busy(false);toast(res.offline?'Saved on phone (offline)':'Saved to sheet');applyData();go('home');
+  }).catch(function(err){busy(false);alert('Save failed: '+err.message)});
+}
+function renderDailyList(){var rows=D.daily.slice().sort(function(a,b){return b.date<a.date?-1:1}).slice(0,7);
+  el('dailyList').innerHTML=rows.length?rows.map(function(r){var s=r.tea+r.egg,e=totalExp(r);return '<div class="row" onclick="editDay(\''+r.date+'\')"><div><div class="t">'+dayName(r.date)+' '+fmt(r.date)+'</div><div class="s">tea '+rs(r.tea)+' · egg '+rs(r.egg)+' · exp '+rs(e)+'</div></div><span class="amt '+(s-e>=0?'sale':'exp')+'">'+rs(s-e)+'</span></div>'}).join(''):'<div class="empty">No entries yet</div>'}
+function editDay(d){el('dDate').value=d;loadDailyForDate();go('daily')}
+
+/* ============ BILLS ============ */
+function bSupChange(){el('bSupNewWrap').style.display=el('bSup').value==='__new'?'block':'none'}
+function renderBills(){
+  var sel=el('bSup'),cur=sel.value;sel.innerHTML=D.lists.suppliers.map(function(s){return '<option>'+esc(s)+'</option>'}).join('')+'<option value="__new">+ New supplier…</option>';if(cur)sel.value=cur;
+  var un=D.purchases.filter(function(p){return p.amount-p.paid>0}).sort(function(a,b){return a.date<b.date?-1:1});
+  el('billsUnpaid').innerHTML=un.length?un.map(function(p){var bal=p.amount-p.paid;
+    return '<div class="row"><div><div class="t">'+esc(p.supplier)+' <span class="pill '+(p.paid?'part':'')+'">'+(p.paid?'Partial':'Unpaid')+'</span></div><div class="s">'+fmt(p.date)+' · bill '+rs(p.amount)+(p.billNo?' · '+esc(p.billNo):'')+'</div></div><div style="text-align:right"><div class="amt exp">'+rs(bal)+'</div>'+(p.row?'<button class="btn sm pay" onclick="openPay('+p.row+','+bal+',\''+esc(p.supplier)+'\')">Pay</button>':'<span class="s">pending sync</span>')+'</div></div>'}).join(''):'<div class="empty">All bills paid ✓</div>';
+  var rec=D.purchases.slice().sort(function(a,b){return b.date<a.date?-1:1}).slice(0,10);
+  el('billsRecent').innerHTML=rec.map(function(p){var bal=p.amount-p.paid,st=bal<=0?'ok':(p.paid?'part':'');return '<div class="row"><div><div class="t">'+esc(p.supplier)+'</div><div class="s">'+fmt(p.date)+' · '+esc(p.type)+'</div></div><div style="text-align:right"><div class="amt">'+rs(p.amount)+'</div><span class="pill '+st+'">'+(bal<=0?'Paid':p.paid?'Partial':'Unpaid')+'</span></div></div>'}).join('')||'<div class="empty">No bills yet</div>';
+}
+function addBill(){
+  var sup=el('bSup').value==='__new'?el('bSupNew').value.trim():el('bSup').value;
+  var e={date:el('bDate').value,supplier:sup,type:el('bType').value,amount:num('bAmt'),paid:num('bPaid'),billDate:el('bBillDate').value,billNo:el('bBillNo').value,note:''};
+  if(!e.date||!sup||!e.amount)return toast('Need supplier and amount');
+  busy(true);
+  write('addPurchase',e).then(function(res){D.purchases.push(Object.assign({row:res.row||0},e));if(D.lists.suppliers.indexOf(sup)<0){D.lists.suppliers.push(sup);D.lists.suppliers.sort()}
+    ['bAmt','bPaid','bBillDate','bBillNo','bSupNew'].forEach(function(id){el(id).value=''});localStorage.setItem('ts_data',JSON.stringify(D));busy(false);toast(res.offline?'Saved on phone (offline)':'Bill saved');applyData()
+  }).catch(function(err){busy(false);alert('Save failed: '+err.message)});
+}
+function openPay(row,bal,sup){el('payRow').value=row;el('payAmt').value=bal;el('mPayTitle').textContent='Pay '+sup+' (balance '+rs(bal)+')';el('mPay').style.display='flex'}
+function doPay(){var row=+el('payRow').value,amt=num('payAmt');if(!amt)return toast('Enter amount');busy(true);closeModals();
+  write('payPurchase',{row:row,amount:amt}).then(function(res){var p=D.purchases.filter(function(x){return x.row===row})[0];if(p)p.paid=res.paid!=null?res.paid:p.paid+amt;localStorage.setItem('ts_data',JSON.stringify(D));busy(false);toast(res.offline?'Saved on phone (offline)':'Payment recorded');applyData()}).catch(function(err){busy(false);alert('Failed: '+err.message)})}
+
+/* ============ STOCK ============ */
+function renderStock(){var q=el('sSearch').value.toLowerCase(),tot=0;var list=D.stock.filter(function(x){tot+=x.qty*x.cost;return !q||(x.item+' '+x.pack).toLowerCase().indexOf(q)>-1});el('sTotal').textContent=rs(tot);
+  el('stockList').innerHTML=list.map(function(x){return '<div class="row"><div onclick="openStock('+x.row+')" style="flex:1"><div class="t">'+esc(x.item)+' <span class="s">'+esc(x.pack)+'</span></div><div class="s">'+rs(x.cost)+' each · '+rs(x.qty*x.cost)+(x.note?' · ⚠ check qty':'')+'</div></div><div class="qty"><button onclick="adj('+x.row+',-1)">−</button><span>'+x.qty+'</span><button onclick="adj('+x.row+',1)">+</button></div></div>'}).join('')||'<div class="empty">No items</div>'}
+function adj(row,delta){var x=D.stock.filter(function(s){return s.row===row})[0];if(!x||!row||x.qty+delta<0)return;x.qty+=delta;renderStock();renderHome();localStorage.setItem('ts_data',JSON.stringify(D));
+  write('adjustStock',{row:row,delta:delta}).then(function(res){if(res.qty!=null){x.qty=res.qty;renderStock()}}).catch(function(err){x.qty-=delta;renderStock();alert('Failed: '+err.message)})}
+function openStock(row){var x=row?D.stock.filter(function(s){return s.row===row})[0]:{item:'',pack:'',qty:0,cost:0};el('msRow').value=row;el('mStockTitle').textContent=row?'Edit item':'New item';el('msItem').value=x.item;el('msPack').value=x.pack;el('msQty').value=x.qty;el('msCost').value=x.cost;el('mStock').style.display='flex'}
+function saveStock(){var e={row:+el('msRow').value,item:el('msItem').value.trim(),pack:el('msPack').value.trim(),qty:num('msQty'),cost:num('msCost'),note:''};if(!e.item)return toast('Enter item name');busy(true);closeModals();
+  write('saveStock',e).then(function(res){var row=res.row||e.row;var i=D.stock.findIndex(function(s){return s.row===row&&row});var rec=Object.assign({},e,{row:row,updated:D.today});if(i>-1)D.stock[i]=rec;else D.stock.push(rec);localStorage.setItem('ts_data',JSON.stringify(D));busy(false);toast(res.offline?'Saved on phone (offline)':'Stock saved');renderStock();renderHome()}).catch(function(err){busy(false);alert('Failed: '+err.message)})}
+
+/* ============ PRICES ============ */
+function renderPrices(){var q=el('prSearch').value.toLowerCase();var list=D.prices.filter(function(x){return !q||(x.product+' '+x.pack).toLowerCase().indexOf(q)>-1});
+  el('priceList').innerHTML=list.map(function(x){var pr=x.sell&&x.cost?x.sell-x.cost:null;return '<div class="row" onclick="openPrice('+x.row+')"><div><div class="t">'+esc(x.product)+' <span class="s">'+esc(x.pack)+'</span></div><div class="s">MRP '+rs(x.mrp)+' · cost '+rs(x.cost)+(pr!==null?' · profit '+rs(pr):'')+'</div></div><span class="amt">'+(x.sell?rs(x.sell):'—')+'</span></div>'}).join('')||'<div class="empty">'+(USER&&USER.role==='admin'?'No products':'Admin only')+'</div>'}
+function openPrice(row){var x=row?D.prices.filter(function(s){return s.row===row})[0]:{product:'',pack:'',mrp:'',cost:'',sell:''};el('mpRow').value=row;el('mPriceTitle').textContent=row?'Edit price':'New product';el('mpProduct').value=x.product;el('mpPack').value=x.pack;el('mpMrp').value=x.mrp||'';el('mpCost').value=x.cost||'';el('mpSell').value=x.sell||'';el('mPrice').style.display='flex'}
+function savePrice(){var e={row:+el('mpRow').value,product:el('mpProduct').value.trim(),pack:el('mpPack').value.trim(),mrp:num('mpMrp'),cost:num('mpCost'),sell:num('mpSell')};if(!e.product)return toast('Enter product name');busy(true);closeModals();
+  write('savePrice',e).then(function(res){var row=res.row||e.row;var i=D.prices.findIndex(function(s){return s.row===row&&row});var rec=Object.assign({},e,{row:row});if(i>-1)D.prices[i]=rec;else D.prices.push(rec);localStorage.setItem('ts_data',JSON.stringify(D));busy(false);toast('Price saved');renderPrices()}).catch(function(err){busy(false);alert('Failed: '+err.message)})}
+
+/* ============ MONTHS ============ */
+function renderMonths(){
+  var ps=periodStart(parseISO(D.today)),rows=[];
+  for(var i=0;i<6;i++){var s=new Date(ps);s.setMonth(s.getMonth()-i);var t=periodTotals(s);t.label=MON[s.getMonth()]+' '+String(s.getFullYear()).slice(2);rows.push(t)}
+  el('mTable').innerHTML='<tr><th>Month</th><th>Sales</th><th>Expense</th><th>Net</th><th>Days</th></tr>'+rows.map(function(t){return '<tr><td>'+t.label+'</td><td class="sale">'+rs(t.sales)+'</td><td class="exp">'+rs(t.exp)+'</td><td><b>'+rs(t.sales-t.exp)+'</b></td><td>'+t.days+'</td></tr>'}).join('');
+  var cs=0,ce=0;el('mCum').innerHTML='<tr><th>Period</th><th>Sales</th><th>Expense</th><th>Net</th></tr>'+rows.map(function(t,i){cs+=t.sales;ce+=t.exp;return '<tr><td>Last '+(i+1)+' month'+(i?'s':'')+'</td><td class="sale">'+rs(cs)+'</td><td class="exp">'+rs(ce)+'</td><td><b>'+rs(cs-ce)+'</b></td></tr>'}).join('');
+}
+
+/* ============ MOCK (only when API_URL is not set — lets you test the UI) ============ */
+function MOCK(action,data){
+  if(!window._m){var t=new Date(),daily=[];for(var i=45;i>=1;i--)daily.push({row:3+i,date:iso(addDays(t,-i)),tea:2000+Math.round(Math.random()*3000),egg:1500+Math.round(Math.random()*1500),shop:3000,eggExp:2000,dsEgg:0,mumbra:0,assam:0,nasta:0,note:''});
+    window._m={daily:daily,purchases:[{row:3,date:iso(addDays(t,-12)),supplier:'Ganesh Tea',type:'Tea Purchase',amount:14401,paid:0,billNo:'TNA-4017'},{row:4,date:iso(addDays(t,-8)),supplier:'Color Tea',type:'Tea Purchase',amount:13300,paid:8000},{row:5,date:iso(addDays(t,-3)),supplier:'Society Tea',type:'Tea Purchase',amount:3450,paid:3450}],
+      stock:[{row:3,item:'Society tea',pack:'500gm',qty:14,cost:277.5},{row:4,item:'Ganesh tea',pack:'1kg',qty:6,cost:569}],prices:[{row:3,product:'Society Tea',pack:'500g',mrp:310,cost:278,sell:310}],lists:{suppliers:['Color Tea','Ganesh Tea','Society Tea'],settings:{'Month starts on day':8}}}}
+  var m=window._m,r={ok:true};
+  if(action==='login') r=data.password==='admin123'?{ok:true,token:'demo',user:{username:data.username,name:'Demo Owner',role:'admin'}}:{ok:false,error:'Wrong username or password (demo: admin / admin123)'};
+  if(action==='getAll') r=Object.assign({ok:true},m);
+  if(action==='saveDaily') r={ok:true,row:99};
+  if(action==='addPurchase') r={ok:true,row:100+m.purchases.length};
+  if(action==='payPurchase'){var p=m.purchases.filter(function(x){return x.row===data.row})[0];r={ok:true,paid:p.paid+data.amount}}
+  if(action==='adjustStock'){var s=m.stock.filter(function(x){return x.row===data.row})[0];r={ok:true,qty:s.qty}}
+  if(action==='saveStock'||action==='savePrice') r={ok:true,row:data.row||200};
+  if(action==='sync') r={ok:true,results:data.map(function(it){return{id:it.id,ok:true}})};
+  return new Promise(function(res,rej){setTimeout(function(){r.ok?res(r):rej(new Error(r.error))},250)});
+}
+
+/* ============ BOOT ============ */
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+if(TOKEN&&USER) start(); else el('login').style.display='block';
+</script>
+</body>
+</html>
